@@ -33,3 +33,11 @@ sensitivities = grant_rf.neighbour_sensitivity(val_feature) #Returns the change 
 trainer_delta = grant_rf.training_delta_trainer(trainer_feature, trainer_label) #Returns the incremental change in result from a given training record to all predictions
 
 grant_rf.training_delta_trainee(trainee_feature, trainee_label) #Returns the incremental change in result from each training record that contributed any given prediction
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
