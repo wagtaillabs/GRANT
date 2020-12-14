@@ -12,7 +12,11 @@ import gc
 
 class grant:
   grafted_df = None 
-  __version__ = "0.0.1"
+  amalgamate_df = None
+  rf = None
+  train_features = None
+  train_labels = None
+  __version__ = "0.0.2"
   
   def __init__(self, rf, train_features, train_labels):
       self.rf = rf
@@ -52,11 +56,14 @@ class grant:
     if self.grafted_df is None: self.graft()
     return(self.__reassemble(self.grafted_df.query(query)))
 
-  def amalgamate(self, threshold):
+  def amalgamate(self, threshold, resume=False):
     if self.grafted_df is None: self.graft()
-    self.amalgamate_df = self.__amalgamate(self.grafted_df, threshold).drop(['amalgamate_count', 'amalgamate_total', 'amalgamate_min', 'amalgamate_max', 
-                                                                             'lead_diff', 'lag_diff', 'min_diff'], axis = 1)
-    
+    drops = ['amalgamate_count', 'amalgamate_total', 'amalgamate_min', 'amalgamate_max', 'lead_diff', 'lag_diff', 'min_diff']
+    if resume: 
+      self.amalgamate_df = self.__amalgamate(self.amalgamate_df, threshold).drop(drops, axis = 1)
+    else:
+      self.amalgamate_df = self.__amalgamate(self.grafted_df, threshold).drop(drops, axis = 1)
+  
   def get_amalgamated(self):
     if self.amalgamate_df is None: raise Exception("Amalgamate has not been run.")
     return(self.amalgamate_df)
@@ -333,11 +340,11 @@ class grant:
     return(leaf_matches)
 
   def __training_delta_trainer(self, train_features, trainer_feature, trainer_label, grafted_df):
-    train_leaves = self.__score_leaves(rf, train_features)                                    #find the leaves for the training records
-    trainer_leaf = self.__score_leaves(rf, trainer_feature)                                   #find the leaves for the answer records
+    train_leaves = self.__score_leaves(self.rf, train_features)                               #find the leaves for the training records
+    trainer_leaf = self.__score_leaves(self.rf, trainer_feature)                              #find the leaves for the answer records
     delta = [0] * len(grafted_df)                                                             #define a list of zeros that's as long as the graft set - our starting assumption is that the answer graft doesn't contribute to any grafts.
     for i in range(len(trainer_leaf.columns)):                                                #iterate through the columns of answer_leaf (i.e. the number of trees in the Random Forest)
-      matched_leaves = self.__match_leaves(rf, train_features, train_leaves, trainer_leaf, i) #find which training records contributed for the answer record
+      matched_leaves = self.__match_leaves(self.rf, train_features, train_leaves, trainer_leaf, i) #find which training records contributed for the answer record
       if np.sum(matched_leaves[trainer_feature.index[0] == matched_leaves.index]) > 0:        #test whether that includes the answer record (training records are randomly sampled for each tree)
         match = (grafted_df.reset_index()['leaf'+str(i)] == trainer_leaf['leaf'+str(i)][0])   #get a list of all graft records that use the leaf of interest
         overlap = list(np.asarray(match) * np.sum(matched_leaves[trainer_feature.index[0] == matched_leaves.index]) / np.sum(matched_leaves))  #calculate the percentage of contributing training records that is the answer record
