@@ -16,7 +16,7 @@ class grant:
   rf = None
   train_features = None
   train_labels = None
-  __version__ = "0.0.2"
+  __version__ = "0.0.3"
   
   def __init__(self, rf, train_features, train_labels):
       self.rf = rf
@@ -59,7 +59,7 @@ class grant:
   def amalgamate(self, threshold, resume=False):
     if self.grafted_df is None: self.graft()
     drops = ['amalgamate_count', 'amalgamate_total', 'amalgamate_min', 'amalgamate_max', 'lead_diff', 'lag_diff', 'min_diff']
-    if resume: 
+    if resume & self.amalgamate_df is not None: 
       self.amalgamate_df = self.__amalgamate(self.amalgamate_df, threshold).drop(drops, axis = 1)
     else:
       self.amalgamate_df = self.__amalgamate(self.grafted_df, threshold).drop(drops, axis = 1)
@@ -328,7 +328,7 @@ class grant:
     cols = feature.columns
     for i in range(len(cols)):
       col = cols[i]
-      sensitivities.loc[:, col+'_delta'] = (neighbours['<'+col].values - feature[col].values[0]).clip(min=0) + (neighbours[col+'<='].values - feature[col].values[0]).clip(max=0)
+      \sensitivities.loc[:, col+'_delta'] = (np.nextafter(neighbours['<'+col].values, np.inf) - feature[col].values[0]).clip(min=0) + (neighbours[col+'<='].values - feature[col].values[0]).clip(max=0)
     return(sensitivities)
 
   def __match_leaves(self, rf, train_df, train_leaves, graft, tree):
