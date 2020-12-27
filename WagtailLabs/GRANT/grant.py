@@ -328,7 +328,7 @@ class grant:
     cols = feature.columns
     for i in range(len(cols)):
       col = cols[i]
-      \sensitivities.loc[:, col+'_delta'] = (np.nextafter(neighbours['<'+col].values, np.inf) - feature[col].values[0]).clip(min=0) + (neighbours[col+'<='].values - feature[col].values[0]).clip(max=0)
+      sensitivities.loc[:, col+'_delta'] = (np.nextafter(neighbours['<'+col].values, np.inf) - feature[col].values[0]).clip(min=0) + (neighbours[col+'<='].values - feature[col].values[0]).clip(max=0)
     return(sensitivities)
 
   def __match_leaves(self, rf, train_df, train_leaves, graft, tree):
